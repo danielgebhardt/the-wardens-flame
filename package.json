@@ -10,7 +10,9 @@
     "frontend:typecheck": "pnpm --filter frontend run typecheck",
     "frontend:check:fix": "pnpm --filter frontend run check:fix",
     "frontend:test": "pnpm --filter frontend run test:run",
-    "frontend:smoke": "pnpm --filter frontend run test:smoke"
+    "frontend:smoke": "pnpm --filter frontend run test:smoke",
+    "frontend:android:build": "pnpm --filter frontend run android:build",
+    "frontend:android:apk": "pnpm --filter frontend run android:apk"
   },
   "devDependencies": {
     "husky": "^9.1.7"

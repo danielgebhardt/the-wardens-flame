@@ -27,6 +27,7 @@ import {
 	GuestAdventureDialog,
 } from "./saves/AccountSaveDialogs";
 import { SavesProvider, useSaves } from "./saves/SavesProvider";
+import { IS_ANDROID_APP } from "./settings/Platform";
 import { ThemeProvider } from "./settings/ThemeProvider.tsx";
 
 // The opening screen or the adventure in play, and the account-driven changes between
@@ -127,7 +128,7 @@ function App() {
 					</StatisticsProvider>
 				</AccountProfileProvider>
 			</AccountProvider>
-			<Analytics />
+			{IS_ANDROID_APP ? null : <Analytics />}
 		</ThemeProvider>
 	);
 }

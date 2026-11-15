@@ -128,7 +128,7 @@ const ActivityLog = memo(function ActivityLog({
                relative flex shrink-0 items-center justify-between
                gap-2 border-b border-border/70
                bg-gradient-to-b from-muted/50 to-card
-               px-3 py-2.5
+               px-3 py-2.5 phone:py-1
                dark:border-amber-900/30
                dark:from-muted dark:to-card
             "

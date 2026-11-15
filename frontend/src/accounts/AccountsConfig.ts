@@ -11,6 +11,8 @@ type Environment = Readonly<Record<string, string | boolean | undefined>>;
 export const firebaseWebConfig = (
 	env: Environment = import.meta.env,
 ): FirebaseWebConfig | undefined => {
+	// The offline Android app never has accounts, even if a local .env supplies keys.
+	if (env.MODE === "android") return undefined;
 	const value = (key: string) =>
 		typeof env[key] === "string" && env[key] ? (env[key] as string) : undefined;
 	const apiKey = value("VITE_FIREBASE_API_KEY");

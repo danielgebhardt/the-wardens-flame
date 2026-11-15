@@ -43,6 +43,20 @@ Browser Save/Load, the separate autosave and cloud saves persist the actual dung
 
 [Save architecture and compatibility policy](docs/save-policy.md) describes the migration chain, frozen per-version fixtures and when a change needs a version bump.
 
+## Android app
+
+`frontend/android` wraps the same game in a [Capacitor](https://capacitorjs.com) shell as a sideloadable, offline Android app, locked to portrait. `vite build --mode android` sets `IS_ANDROID_APP` (`frontend/src/settings/Platform.ts`). That build has no accounts, cloud saves, online rankings or analytics, keeps its saves in the WebView's local storage on the phone, and adds a phone layout (the `phone:` Tailwind variant) and touch controls.
+
+The touch bar holds a D-pad (centre waits, or casts while aiming), Pick up, Interact, Enter, Run, Character and Cancel. Each button sends the key a keyboard player would press, so touch and keyboard play follow the same rules. Android's back gesture closes the top dialog or stops aiming. To try the phone layout in a desktop browser, add `?touch` to the URL.
+
+To build the APK you need JDK 21 and the Android SDK (`ANDROID_HOME`, platform 36):
+
+```bash
+pnpm frontend:android:apk
+```
+
+The APK is written to `frontend/android/app/build/outputs/apk/debug/app-debug.apk`. The **Android app** workflow also builds it on pushes to `main` and on demand, and keeps it as the `wardens-flame-apk` artifact. Every build is signed with the committed sideload key (`frontend/android/app/sideload.keystore`), so a new APK installs over the old one and keeps the saved game. That key is only for sideloading, never for a store release.
+
 ## Accounts
 
 Signing in is optional; everything plays without an account. Accounts use **Firebase Authentication** (Google, and email with a password) on the free Spark plan. Trusted server work runs in **Vercel serverless functions** under `frontend/api`: `GET /api/account` verifies a Firebase ID token; `POST /api/statistics` validates a finished save and records its run summary. The Firebase library loads only when someone opens sign-in or already has a session on that device, so signed-out play downloads none of it (see `docs/performance-baseline.md`).

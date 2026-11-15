@@ -27,7 +27,7 @@ const QuestStatus = ({
 		return (
 			<section
 				aria-label="Quest pouch"
-				className="flex min-w-0 items-center gap-3 rounded-lg border border-primary/20 bg-card/50 px-3 py-1.5"
+				className="flex min-w-0 items-center gap-3 rounded-lg border border-primary/20 bg-card/50 px-3 py-1.5 phone:gap-2 phone:px-2 phone:py-0.5"
 			>
 				<span aria-hidden="true" className="size-6 shrink-0">
 					<ItemIcon kind="cure" />
@@ -57,14 +57,14 @@ const QuestStatus = ({
 			aria-label="Adventure quest"
 			className="ember-panel ember-objective flex min-w-0 items-center gap-1 border px-1 py-1"
 		>
-			<EmberEmblem className="-ml-1 size-14" />
+			<EmberEmblem className="-ml-1 size-14 phone:size-7" />
 			<div className="flex min-w-0 flex-col gap-0.5">
-				<span className="font-serif text-sm font-semibold tracking-wide text-amber-900 dark:text-amber-300">
+				<span className="font-serif text-sm font-semibold tracking-wide text-amber-900 dark:text-amber-300 phone:sr-only">
 					Objective
 				</span>
 				<output
 					aria-label="Quest objective"
-					className="text-sm leading-4 text-foreground/85"
+					className="text-sm leading-4 text-foreground/85 phone:text-xs"
 				>
 					{instruction}
 					{returnInstruction}

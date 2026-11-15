@@ -26,4 +26,4 @@ Seed 7357 (`frontend/src/domain/game/TestSeed.ts`) is the developer test adventu
 
 ## Supported screens
 
-Target laptops and larger monitors, with an iPad as the smallest: it must look right on a 13" MacBook (about 1470×830 browser area) and on large displays. Phones are not a target, so don't add phone-specific layouts or 390px browser variants.
+Target laptops and larger monitors, with an iPad as the smallest: it must look right on a 13" MacBook (about 1470×830 browser area) and on large displays. Phones are not a target, so don't add phone-specific layouts or 390px browser variants. The one exception is the sideloadable Android app (`frontend/android`, README "Android app"): its portrait phone layout and touch controls apply only under `IS_ANDROID_APP` / `?touch` through the `phone:` variant, and must leave the web layout unchanged. Touch buttons send the existing keyboard keys and add no game rules.
