@@ -36,6 +36,7 @@ const ResourceCard = ({
 		className={`
          flex min-w-0 flex-col justify-center gap-2
          border-r border-border/70 px-3 py-2 lg:px-2.5 xl:px-3
+         phone:gap-1 phone:py-1
          ${warning ? "rounded bg-destructive/10" : ""}
       `}
 	>
@@ -162,7 +163,7 @@ const PlayerStatus = ({
       lg:col-span-1 lg:border-b-0 lg:border-r lg:pb-0
    "
 				>
-					<AdventurerPortrait className="size-16 lg:max-xl:size-12" />
+					<AdventurerPortrait className="size-16 lg:max-xl:size-12 phone:hidden" />
 
 					<div className="flex min-w-0 flex-1 flex-col gap-1">
 						{/* Single row: character name, difficulty, turn */}
@@ -188,7 +189,7 @@ const PlayerStatus = ({
 						</div>
 
 						{/* Second row: active status effects */}
-						<div className="min-h-6">
+						<div className="min-h-6 phone:min-h-0">
 							<StatusEffectIcons
 								effects={effects}
 								afflictions={afflictions}
@@ -256,7 +257,7 @@ const PlayerStatus = ({
 				<div
 					className="
                   flex min-w-0 items-center justify-center gap-2
-                  border-r border-border/70 px-2 py-2
+                  border-r border-border/70 px-2 py-2 phone:py-0.5
                   lg:flex-col lg:gap-1 lg:px-1
                   xl:flex-row xl:flex-wrap xl:gap-2 xl:px-2
                "
@@ -276,7 +277,7 @@ const PlayerStatus = ({
 				</div>
 
 				{/* Level and experience */}
-				<div className="flex min-w-0 flex-col justify-center gap-2 px-3 py-2 lg:px-2 xl:px-3">
+				<div className="flex min-w-0 flex-col justify-center gap-2 px-3 py-2 lg:px-2 xl:px-3 phone:gap-0.5 phone:py-0.5">
 					<div className="flex items-center gap-1.5 text-[16px]">
 						<Sparkles
 							aria-hidden="true"

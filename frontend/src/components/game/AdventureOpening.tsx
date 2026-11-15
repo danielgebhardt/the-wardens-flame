@@ -23,6 +23,7 @@ import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
 import type { DeveloperFeature } from "../../domain/game/DeveloperFeatures";
 import { type SaveDocument, saveSummary } from "../../domain/saves/SaveFormat";
 import { useSaves } from "../../saves/SavesProvider";
+import { IS_ANDROID_APP } from "../../settings/Platform";
 import RankingsButton from "../../statistics/RankingsButton";
 import AdventurerChoice from "./AdventurerChoice";
 import AdventureSaveSheet from "./AdventureSaveSheet";
@@ -317,9 +318,12 @@ const AdventureOpening = ({
 										</p>
 									)}
 
-									<div className="grid grid-cols-2 gap-2.5 [&>button]:h-10">
+									<div
+										className={`grid gap-2.5 [&>button]:h-10 ${IS_ANDROID_APP ? "grid-cols-1" : "grid-cols-2"}`}
+									>
 										<RunHistoryDialog triggerClassName="w-full text-muted-foreground hover:text-foreground" />
-										<RankingsButton />
+										{/* The offline Android app has no online rankings. */}
+										{IS_ANDROID_APP ? null : <RankingsButton />}
 									</div>
 
 									<div className="flex items-center justify-center gap-2">

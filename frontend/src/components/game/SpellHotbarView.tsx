@@ -32,7 +32,7 @@ const SpellHotbarView = ({
 }) => (
 	<section
 		aria-label="Spell hotbar"
-		className="grid min-w-0 grid-cols-3 items-start gap-1 sm:grid-cols-6"
+		className="grid min-w-0 shrink-0 grid-cols-3 items-start gap-1 sm:grid-cols-6 phone:grid-cols-6 phone:gap-0.5"
 	>
 		{slots.map((spell, index) => {
 			const shortcut = SPELL_SLOT_KEYS[SPELL_SLOTS[index]];

@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { touchControlsEnabled } from "./Platform";
 
 // The map tile sizes Settings offers, smallest first, in CSS pixels. Each row
 // also sets what has to grow with the tiles; add a row to offer another size.
@@ -34,6 +35,8 @@ export const TILE_SIZES = [
 
 export type TileSize = (typeof TILE_SIZES)[number]["tile"];
 export const DEFAULT_TILE_SIZE: TileSize = 32;
+// A phone shows more of the floor with the smallest tiles; Settings can still change it.
+export const PHONE_DEFAULT_TILE_SIZE: TileSize = 24;
 
 const storageKey = "larn-tile-size";
 
@@ -61,7 +64,7 @@ const readTileSize = (): TileSize => {
 	} catch {
 		// The map still sizes itself when browser storage is unavailable.
 	}
-	return DEFAULT_TILE_SIZE;
+	return touchControlsEnabled() ? PHONE_DEFAULT_TILE_SIZE : DEFAULT_TILE_SIZE;
 };
 
 let current: TileSize = readTileSize();

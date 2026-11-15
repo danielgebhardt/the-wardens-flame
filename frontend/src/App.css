@@ -4,6 +4,8 @@
 @import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
+/* The Android app's portrait phone layout (see settings/Platform.ts); never set on the web. */
+@custom-variant phone (&:where([data-phone], [data-phone] *));
 
 @theme inline {
 	--font-heading: var(--font-serif);

@@ -44,7 +44,7 @@ const PotionHotbarView = ({
 }) => (
 	<section
 		aria-label="Potion hotbar"
-		className="grid min-w-0 grid-cols-4 items-start gap-1"
+		className="grid min-w-0 shrink-0 grid-cols-4 items-start gap-1 phone:gap-0.5"
 	>
 		{HOTBAR_SLOTS.map((slot) => {
 			const { kind, count } = hotbarSlotContents({ bag, potionHotbar }, slot);
@@ -71,7 +71,9 @@ const PotionHotbarView = ({
 						<HotbarShortcut shortcut={String(slot)} />
 
 						{kind ? (
-							<span className={`size-7 ${count === 0 ? "opacity-40" : ""}`}>
+							<span
+								className={`size-7 phone:size-6 ${count === 0 ? "opacity-40" : ""}`}
+							>
 								<ItemIcon kind={kind} />
 							</span>
 						) : (
@@ -83,7 +85,7 @@ const PotionHotbarView = ({
 						{kind && (
 							<span
 								aria-hidden="true"
-								className="absolute right-[7px] bottom-[5px] text-[11px] font-medium leading-none tabular-nums"
+								className="absolute right-[7px] bottom-[5px] text-[11px] font-medium leading-none tabular-nums phone:right-0.5 phone:bottom-0.5 phone:text-[10px]"
 							>
 								{count}
 							</span>

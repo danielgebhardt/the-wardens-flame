@@ -39,7 +39,7 @@ const DungeonNotices = ({
 	return (
 		// Grows with what there is to say, from one line up to a scrolling cap, so the
 		// map keeps its full height and the activity log below takes what's left.
-		<div className="ember-panel flex min-h-11 max-h-[40dvh] min-w-0 shrink-0 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm dark:border-amber-900/25">
+		<div className="ember-panel flex min-h-11 phone:min-h-8 phone:max-h-24 max-h-[40dvh] min-w-0 shrink-0 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm dark:border-amber-900/25">
 			<section
 				aria-label="Dungeon notices"
 				// biome-ignore lint/a11y/noNoninteractiveTabindex: Keyboard users need to scroll longer notices.

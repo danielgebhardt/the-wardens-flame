@@ -48,6 +48,7 @@ import { useSpellTargeting } from "./components/game/useSpellTargeting";
 import VictoryDialog from "./components/game/VictoryDialog";
 import MerchantDialog from "./components/merchant/MerchantDialog";
 import ObjectChoiceDialog from "./components/objects/ObjectChoiceDialog";
+import { TouchControls } from "./components/touch/TouchControls";
 import SanctuaryDialog from "./components/town/SanctuaryDialog";
 import TownEquipmentShop from "./components/town/TownEquipmentShop";
 import TownForgeDialog from "./components/town/TownForgeDialog";
@@ -103,6 +104,7 @@ import Header from "./Header.tsx";
 import { addRunToHistory } from "./persistence/RunHistory";
 import DungeonSettings from "./settings/DungeonSettings.tsx";
 import { APP_FEATURES } from "./settings/FeatureFlags";
+import { IS_ANDROID_APP, touchControlsEnabled } from "./settings/Platform";
 import {
 	type ConfigurationErrors,
 	type ConfigurationField,
@@ -222,6 +224,7 @@ const Home = ({
 	const [pickupOpen, setPickupOpen] = useState(false);
 	const [merchantId, setMerchantId] = useState<string | null>(null);
 	const mapRef = useRef<HTMLElement>(null);
+	const [touch] = useState(() => touchControlsEnabled());
 	const previousDeveloperPage = useRef(false);
 	useEffect(() => {
 		if (developerStatisticsOpen) {
@@ -533,7 +536,7 @@ const Home = ({
 	};
 
 	return (
-		<div className="ember-surface flex min-h-dvh flex-col bg-muted/30 lg:h-dvh">
+		<div className="ember-surface flex min-h-dvh flex-col bg-muted/30 lg:h-dvh phone:h-dvh phone:min-h-0 phone:overflow-hidden">
 			<Header
 				floorNumber={town ? 0 : activeFloor.floorNumber}
 				floorCount={run.floors.length}
@@ -730,17 +733,20 @@ const Home = ({
 						</Sheet>
 					)
 				}
+				// The offline Android app has no online rankings; Run history lists its runs.
 				rankingsAction={
-					<RankingsButton
-						header
-						open={rankingsOpen}
-						onOpenChange={setRankingsOpen}
-						finalFocus={mapInputAvailable ? mapRef : false}
-						onClosed={() => {
-							if (mapInputAvailable)
-								mapRef.current?.focus({ preventScroll: true });
-						}}
-					/>
+					IS_ANDROID_APP ? undefined : (
+						<RankingsButton
+							header
+							open={rankingsOpen}
+							onOpenChange={setRankingsOpen}
+							finalFocus={mapInputAvailable ? mapRef : false}
+							onClosed={() => {
+								if (mapInputAvailable)
+									mapRef.current?.focus({ preventScroll: true });
+							}}
+						/>
+					)
 				}
 				devAction={
 					<DeveloperMenu
@@ -777,17 +783,17 @@ const Home = ({
 				}
 			/>
 
-			<main className="flex min-h-0 min-w-0 flex-1 p-2">
+			<main className="flex min-h-0 min-w-0 flex-1 p-2 phone:p-1">
 				<section
 					aria-label="Adventure"
 					data-low-health={isLowHealth(player)}
-					className="ember-surface flex min-h-0 min-w-0 flex-1 flex-col gap-2 rounded-lg border border-border bg-card p-2"
+					className="ember-surface flex min-h-0 min-w-0 flex-1 flex-col gap-2 rounded-lg border border-border bg-card p-2 phone:gap-1 phone:p-1"
 				>
 					<FantasyRail className="mx-auto w-full max-w-[83rem] shrink-0">
 						<div
 							className="
          grid min-w-0 grid-cols-1 items-center gap-2
-         rounded-md bg-muted/20 px-2 py-1.5 sm:px-7
+         rounded-md bg-muted/20 px-2 py-1.5 sm:px-7 phone:gap-1 phone:px-1 phone:py-0.5
          lg:grid-cols-[minmax(0,1fr)_19rem] xl:grid-cols-[minmax(0,1fr)_20rem]
       "
 						>
@@ -817,8 +823,8 @@ const Home = ({
 							</div>
 						</div>
 					</FantasyRail>
-					<div className="grid min-h-0 flex-1 grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_18rem] lg:grid-rows-[auto_minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:grid-cols-[minmax(0,1fr)_22rem] min-[112.5rem]:grid-cols-[minmax(0,1fr)_26rem]">
-						<div className="order-1 flex h-[50dvh] min-h-[23rem] min-w-0 flex-col lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:h-auto lg:min-h-0">
+					<div className="grid min-h-0 flex-1 grid-cols-1 gap-2 phone:flex phone:flex-col phone:gap-1 lg:grid-cols-[minmax(0,1fr)_18rem] lg:grid-rows-[auto_minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:grid-cols-[minmax(0,1fr)_22rem] min-[112.5rem]:grid-cols-[minmax(0,1fr)_26rem]">
+						<div className="order-1 flex h-[50dvh] min-h-[23rem] min-w-0 flex-col phone:h-auto phone:min-h-40 phone:flex-1 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:h-auto lg:min-h-0">
 							<DungeonFrame>
 								{town ? (
 									<TownMap
@@ -993,7 +999,7 @@ const Home = ({
 								}
 							/>
 						</div>
-						<div className="order-4 flex min-h-0 min-w-0 flex-col lg:col-start-2 lg:row-span-2 lg:row-start-2 [&>*]:flex-1 [&>*]:min-h-0">
+						<div className="order-4 flex min-h-0 min-w-0 flex-col phone:h-24 phone:shrink-0 lg:col-start-2 lg:row-span-2 lg:row-start-2 [&>*]:flex-1 [&>*]:min-h-0">
 							<ActivityLog
 								history={game.state.activityHistory}
 								resetKey={run.floors}
@@ -1009,6 +1015,7 @@ const Home = ({
             items-start justify-center gap-x-3 gap-y-3
             bg-muted/20 px-8 py-2 @min-[57rem]/hotbar:px-5
             @max-[57rem]/hotbar:gap-x-2
+            phone:flex-nowrap phone:gap-x-0.5! phone:overflow-x-auto phone:px-1 phone:py-1
          "
 								>
 									<RemediesButton
@@ -1043,6 +1050,9 @@ const Home = ({
 							</FantasyRail>
 						</div>
 					</div>
+					{touch ? (
+						<TouchControls mapRef={mapRef} aiming={Boolean(spells.targeting)} />
+					) : null}
 				</section>
 			</main>
 			<NewAdventureDialog

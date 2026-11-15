@@ -84,6 +84,7 @@ import { TOWN_SCROLL_OFFERS } from "../domain/town/TownEconomy";
 import { FORGE_TIER_PRICES } from "../domain/town/TownForge";
 import { LIBRARY_PRICE } from "../domain/town/TownLibrary";
 import { STORAGE_CAPACITY } from "../domain/town/TownStorage";
+import { touchControlsEnabled } from "./Platform";
 
 const Keycap = ({
 	children,
@@ -181,6 +182,34 @@ const DungeonHelp = ({
 				<EmberTab value="mechanics">Mechanics</EmberTab>
 			</EmberTabsList>
 			<Tabs.Panel value="controls" className="grid gap-6">
+				{touchControlsEnabled() ? (
+					<EmberPanel
+						aria-labelledby="touch-controls-title"
+						className="grid content-start gap-3"
+					>
+						<h3 id="touch-controls-title" className="font-medium">
+							Touch controls
+						</h3>
+						<ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+							<li>
+								The arrows move one tile; hold one to keep walking. The centre
+								button waits a turn.
+							</li>
+							<li>
+								Pick up, Interact, Enter and Run do what G, E, Enter and R do
+								below. Run, then an arrow, follows a corridor.
+							</li>
+							<li>
+								Tap a potion or spell slot to use it. While aiming, the arrows
+								pick a target and the centre casts.
+							</li>
+							<li>
+								Cancel or the back gesture stops aiming or closes a window. Tap
+								neighbouring town tiles to walk or browse shops.
+							</li>
+						</ul>
+					</EmberPanel>
+				) : null}
 				<EmberPanel
 					aria-labelledby="keyboard-controls-title"
 					className="grid content-start gap-3"
