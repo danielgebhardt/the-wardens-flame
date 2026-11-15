@@ -3,17 +3,19 @@ import {
 	ArrowLeft,
 	ArrowRight,
 	ArrowUp,
+	ChevronsRight,
 	DoorOpen,
-	Footprints,
 	Hand,
 	Hourglass,
 	PackageOpen,
+	Sparkles,
 	UserRound,
 	X,
 } from "lucide-react";
 import {
 	type ComponentType,
 	type PointerEvent,
+	type ReactNode,
 	type RefObject,
 	useEffect,
 	useRef,
@@ -57,6 +59,7 @@ type TouchButtonProps = {
 	mapRef: RefObject<HTMLElement | null>;
 	repeats?: boolean;
 	text?: string;
+	badge?: boolean;
 	className?: string;
 };
 
@@ -67,6 +70,7 @@ const TouchButton = ({
 	mapRef,
 	repeats = false,
 	text,
+	badge = false,
 	className = "",
 }: TouchButtonProps) => {
 	const timer = useRef<number | undefined>(undefined);
@@ -97,59 +101,108 @@ const TouchButton = ({
 			onPointerCancel={stop}
 			onPointerLeave={stop}
 			onContextMenu={(event) => event.preventDefault()}
-			className={`flex touch-none select-none flex-col items-center justify-center gap-0.5 rounded-md border border-amber-800/40 bg-muted/60 text-foreground shadow-sm active:bg-amber-500/30 dark:border-amber-500/30 ${className}`}
+			className={`relative flex touch-none select-none flex-col items-center justify-center gap-0.5 rounded-lg border border-border bg-muted/60 text-foreground shadow-sm active:brightness-125 ${className}`}
 		>
 			<Icon aria-hidden className="size-5" />
 			{text ? (
-				<span className="text-[10px] leading-none font-medium">{text}</span>
+				<span className="max-w-full truncate px-0.5 text-[10px] leading-none font-medium">
+					{text}
+				</span>
+			) : null}
+			{badge ? (
+				<span
+					aria-hidden="true"
+					className="absolute top-1.5 right-1.5 size-2 rounded-full bg-amber-500 shadow-[0_0_6px_#f59e0b]"
+				/>
 			) : null}
 		</button>
 	);
 };
 
+// The pad's top-right corner does what G, E or Enter would on this tile, named for it.
+export type TouchContextAction = Readonly<{
+	label: string;
+	// Read to screen readers: what the action applies to, such as an item or a door.
+	detail?: string;
+	key: "g" | "e" | "Enter";
+	available: boolean;
+}>;
+
+const CONTEXT_ICONS = { g: PackageOpen, e: Hand, Enter: DoorOpen } as const;
+
 type TouchControlsProps = {
 	mapRef: RefObject<HTMLElement | null>;
 	// While a spell is aimed the pad picks targets and the centre casts instead of waiting.
 	aiming?: boolean;
+	context: TouchContextAction;
+	perkWaiting?: boolean;
+	// The quick slots, laid out beside the pad.
+	hotbar: ReactNode;
 };
 
+// The phone layout's bottom: a movement pad whose corners hold Run, the tile's action,
+// Cancel and Character, beside the quick slots.
 export const TouchControls = ({
 	mapRef,
 	aiming = false,
+	context,
+	perkWaiting = false,
+	hotbar,
 }: TouchControlsProps) => {
 	useAndroidBackButton(mapRef, aiming);
-	const pad = "size-12";
+	const arrow = "h-[50px] border-amber-700/50 dark:border-amber-500/40";
+	const corner = "h-[50px] bg-card text-muted-foreground";
+	const amber =
+		"h-[50px] border-amber-600/70 bg-gradient-to-b from-amber-200 to-amber-400 text-amber-950 dark:border-amber-500/70 dark:from-[#6b3d12] dark:to-[#3d2410] dark:text-amber-100";
 	return (
 		<section
 			aria-label="Touch controls"
-			className="flex shrink-0 items-center justify-between gap-2 px-1"
+			className="flex shrink-0 items-center gap-3 px-1 pt-1 pb-1.5"
 		>
-			<div className="grid grid-cols-3 grid-rows-3 gap-1">
-				<span />
+			<div className="grid w-[11.5rem] shrink-0 grid-cols-3 gap-1.5">
+				<TouchButton
+					label="Run"
+					icon={ChevronsRight}
+					text="Run"
+					gameKey="r"
+					mapRef={mapRef}
+					className={`${corner} rounded-tl-[1.375rem]`}
+				/>
 				<TouchButton
 					label="Move up"
 					icon={ArrowUp}
 					gameKey="ArrowUp"
 					mapRef={mapRef}
 					repeats
-					className={pad}
+					className={arrow}
 				/>
-				<span />
+				<TouchButton
+					label={
+						context.detail
+							? `${context.label}: ${context.detail}`
+							: context.label
+					}
+					icon={CONTEXT_ICONS[context.key]}
+					text={context.label}
+					gameKey={context.key}
+					mapRef={mapRef}
+					className={`${amber} rounded-tr-[1.375rem] ${context.available ? "" : "opacity-60"}`}
+				/>
 				<TouchButton
 					label="Move left"
 					icon={ArrowLeft}
 					gameKey="ArrowLeft"
 					mapRef={mapRef}
 					repeats
-					className={pad}
+					className={arrow}
 				/>
 				<TouchButton
 					label={aiming ? "Cast at target" : "Wait"}
-					icon={aiming ? Hand : Hourglass}
+					icon={aiming ? Sparkles : Hourglass}
 					text={aiming ? "Cast" : "Wait"}
 					gameKey={aiming ? "Enter" : " "}
 					mapRef={mapRef}
-					className={pad}
+					className={`h-[50px] rounded-full ${aiming ? "border-violet-500/70 text-violet-700 dark:text-violet-300" : "text-muted-foreground"}`}
 				/>
 				<TouchButton
 					label="Move right"
@@ -157,59 +210,7 @@ export const TouchControls = ({
 					gameKey="ArrowRight"
 					mapRef={mapRef}
 					repeats
-					className={pad}
-				/>
-				<span />
-				<TouchButton
-					label="Move down"
-					icon={ArrowDown}
-					gameKey="ArrowDown"
-					mapRef={mapRef}
-					repeats
-					className={pad}
-				/>
-				<span />
-			</div>
-			<div className="grid grid-cols-3 gap-1.5">
-				<TouchButton
-					label="Pick up"
-					icon={PackageOpen}
-					text="Pick up"
-					gameKey="g"
-					mapRef={mapRef}
-					className="h-14 w-16"
-				/>
-				<TouchButton
-					label="Interact"
-					icon={Hand}
-					text="Interact"
-					gameKey="e"
-					mapRef={mapRef}
-					className="h-14 w-16"
-				/>
-				<TouchButton
-					label="Enter or leave"
-					icon={DoorOpen}
-					text="Enter"
-					gameKey="Enter"
-					mapRef={mapRef}
-					className="h-14 w-16"
-				/>
-				<TouchButton
-					label="Run"
-					icon={Footprints}
-					text="Run"
-					gameKey="r"
-					mapRef={mapRef}
-					className="h-14 w-16"
-				/>
-				<TouchButton
-					label="Open character"
-					icon={UserRound}
-					text="Character"
-					gameKey="c"
-					mapRef={mapRef}
-					className="h-14 w-16"
+					className={arrow}
 				/>
 				<TouchButton
 					label="Cancel"
@@ -217,9 +218,28 @@ export const TouchControls = ({
 					text="Cancel"
 					gameKey="Escape"
 					mapRef={mapRef}
-					className="h-14 w-16"
+					className={`${corner} rounded-bl-[1.375rem]`}
+				/>
+				<TouchButton
+					label="Move down"
+					icon={ArrowDown}
+					gameKey="ArrowDown"
+					mapRef={mapRef}
+					repeats
+					className={arrow}
+				/>
+				<TouchButton
+					label={
+						perkWaiting ? "Open character, perk waiting" : "Open character"
+					}
+					icon={UserRound}
+					gameKey="c"
+					mapRef={mapRef}
+					badge={perkWaiting}
+					className={`${amber} rounded-br-[1.375rem]`}
 				/>
 			</div>
+			<div className="min-w-0 flex-1">{hotbar}</div>
 		</section>
 	);
 };

@@ -193,19 +193,21 @@ const DungeonHelp = ({
 						<ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
 							<li>
 								The arrows move one tile; hold one to keep walking. The centre
-								button waits a turn.
+								button waits a turn, or casts while you aim a spell.
 							</li>
 							<li>
-								Pick up, Interact, Enter and Run do what G, E, Enter and R do
-								below. Run, then an arrow, follows a corridor.
+								The amber top-right corner does what this tile offers and says
+								so: Pick up, Open, Use, Trade, Descend or To town.
 							</li>
 							<li>
-								Tap a potion or spell slot to use it. While aiming, the arrows
-								pick a target and the centre casts.
+								Run, then an arrow, follows a corridor. Cancel stops aiming or a
+								run. The amber bottom-right corner, or the health bar, opens
+								Character.
 							</li>
 							<li>
-								Cancel or the back gesture stops aiming or closes a window. Tap
-								neighbouring town tiles to walk or browse shops.
+								Tap a potion or spell slot to use it; the book slot lists every
+								spell you know. Log shows the full activity log, and the back
+								gesture closes a window.
 							</li>
 						</ul>
 					</EmberPanel>

@@ -44,7 +44,7 @@ const PotionHotbarView = ({
 }) => (
 	<section
 		aria-label="Potion hotbar"
-		className="grid min-w-0 shrink-0 grid-cols-4 items-start gap-1 phone:gap-0.5"
+		className="grid min-w-0 shrink-0 grid-cols-4 items-start gap-1 phone:contents"
 	>
 		{HOTBAR_SLOTS.map((slot) => {
 			const { kind, count } = hotbarSlotContents({ bag, potionHotbar }, slot);

@@ -13,7 +13,7 @@ import Home from "./TestHome";
 
 // The Android app's touch bar sends the keys a keyboard player would press, so these
 // check that each button reaches the same game action, not new rules.
-const setup = () => {
+const setup = (overrides: Partial<GameState.GameState> = {}) => {
 	stubDungeonRun(createCorridorEncounter());
 	const create = GameState.createGameState;
 	vi.spyOn(GameState, "createGameState").mockImplementationOnce((run) => ({
@@ -28,6 +28,7 @@ const setup = () => {
 				health: 9,
 			},
 		],
+		...overrides,
 	}));
 	renderHome(<Home />);
 	const map = screen.getByLabelText("Dungeon map", { exact: true });
@@ -88,10 +89,45 @@ describe("Touch controls", () => {
 		expect(map).toHaveFocus();
 	});
 
-	it("open the character sheet", () => {
+	it("open the character sheet from the pad, the status strip and the spells slot", () => {
 		setup();
 		tap("Open character");
 		expect(screen.getByRole("dialog")).toBeVisible();
+		fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+		fireEvent.click(screen.getByRole("button", { name: "Character status" }));
+		expect(screen.getByRole("tab", { name: /Character/ })).toHaveAttribute(
+			"aria-selected",
+			"true",
+		);
+		fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+		fireEvent.click(screen.getByRole("button", { name: "Open spells" }));
+		expect(screen.getByRole("tab", { name: /Spells/ })).toHaveAttribute(
+			"aria-selected",
+			"true",
+		);
+	});
+
+	it("name the tile's action in the action corner and do it", () => {
+		setup({
+			floorItems: [
+				{
+					item: { id: "loot:shield", kind: "wooden-shield" },
+					floorNumber: 1,
+					coordinate: { row: 1, col: 1 },
+				},
+			],
+		});
+		tap("Pick up: Wooden shield");
+		expect(turn()).toHaveTextContent("Turn 1");
+		expect(
+			screen.queryByRole("button", { name: /^Pick up/ }),
+		).not.toBeInTheDocument();
+	});
+
+	it("open the activity log from the message line", () => {
+		setup();
+		fireEvent.click(screen.getByRole("button", { name: "Log" }));
+		expect(screen.getByRole("dialog", { name: "Activity log" })).toBeVisible();
 	});
 
 	it("start a corridor run with Run then a direction", () => {

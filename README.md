@@ -47,7 +47,7 @@ Browser Save/Load, the separate autosave and cloud saves persist the actual dung
 
 `frontend/android` wraps the same game in a [Capacitor](https://capacitorjs.com) shell as a sideloadable, offline Android app, locked to portrait. `vite build --mode android` sets `IS_ANDROID_APP` (`frontend/src/settings/Platform.ts`). That build has no accounts, cloud saves, online rankings or analytics, keeps its saves in the WebView's local storage on the phone, and adds a phone layout (the `phone:` Tailwind variant) and touch controls.
 
-The touch bar holds a D-pad (centre waits, or casts while aiming), Pick up, Interact, Enter, Run, Character and Cancel. Each button sends the key a keyboard player would press, so touch and keyboard play follow the same rules. Android's back gesture closes the top dialog or stops aiming. To try the phone layout in a desktop browser, add `?touch` to the URL.
+The phone layout keeps the map large: one status strip (tap it for Character), one message line with a Log button, and a bottom bar. The bar's 3×3 pad moves you, waits or casts in the centre, and holds Run, the tile's action (Pick up, Open, Descend…), Cancel and Character in its corners; beside it a 4×3 hotbar holds the potions, spells, Remedies and a Spells shortcut. New adventure, Settings and Bestiary sit in the header menu. Each button sends the key a keyboard player would press, so touch and keyboard play follow the same rules. Android's back gesture closes the top dialog or stops aiming. To try the phone layout in a desktop browser, add `?touch` to the URL.
 
 To build the APK you need JDK 21 and the Android SDK (`ANDROID_HOME`, platform 36):
 
