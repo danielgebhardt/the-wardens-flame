@@ -192,12 +192,13 @@ const DungeonHelp = ({
 						</h3>
 						<ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
 							<li>
-								The arrows move one tile; hold one to keep walking. The centre
-								button waits a turn, or casts while you aim a spell.
+								The arrows move one tile; hold one to keep walking. The
+								top-right corner waits a turn.
 							</li>
 							<li>
-								The amber top-right corner does what this tile offers and says
-								so: Pick up, Open, Use, Trade, Descend or To town.
+								The amber centre button does what this tile offers and says so:
+								Pick up, Open, Use, Trade, Descend or To town. While you aim a
+								spell it casts instead.
 							</li>
 							<li>
 								Run, then an arrow, follows a corridor. Cancel stops aiming or a

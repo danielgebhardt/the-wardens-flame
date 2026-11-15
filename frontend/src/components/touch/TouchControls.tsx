@@ -119,7 +119,7 @@ const TouchButton = ({
 	);
 };
 
-// The pad's top-right corner does what G, E or Enter would on this tile, named for it.
+// The pad's centre does what G, E or Enter would on this tile, named for it.
 export type TouchContextAction = Readonly<{
 	label: string;
 	// Read to screen readers: what the action applies to, such as an item or a door.
@@ -140,8 +140,8 @@ type TouchControlsProps = {
 	hotbar: ReactNode;
 };
 
-// The phone layout's bottom: a movement pad whose corners hold Run, the tile's action,
-// Cancel and Character, beside the quick slots.
+// The phone layout's bottom: a movement pad with the tile's action in the centre and Run,
+// Wait, Cancel and Character in its corners, beside the quick slots.
 export const TouchControls = ({
 	mapRef,
 	aiming = false,
@@ -177,16 +177,12 @@ export const TouchControls = ({
 					className={arrow}
 				/>
 				<TouchButton
-					label={
-						context.detail
-							? `${context.label}: ${context.detail}`
-							: context.label
-					}
-					icon={CONTEXT_ICONS[context.key]}
-					text={context.label}
-					gameKey={context.key}
+					label="Wait"
+					icon={Hourglass}
+					text="Wait"
+					gameKey=" "
 					mapRef={mapRef}
-					className={`${amber} rounded-tr-[1.375rem] ${context.available ? "" : "opacity-60"}`}
+					className={`${corner} rounded-tr-[1.375rem]`}
 				/>
 				<TouchButton
 					label="Move left"
@@ -196,14 +192,29 @@ export const TouchControls = ({
 					repeats
 					className={arrow}
 				/>
-				<TouchButton
-					label={aiming ? "Cast at target" : "Wait"}
-					icon={aiming ? Sparkles : Hourglass}
-					text={aiming ? "Cast" : "Wait"}
-					gameKey={aiming ? "Enter" : " "}
-					mapRef={mapRef}
-					className={`h-[50px] rounded-full ${aiming ? "border-violet-500/70 text-violet-700 dark:text-violet-300" : "text-muted-foreground"}`}
-				/>
+				{aiming ? (
+					<TouchButton
+						label="Cast at target"
+						icon={Sparkles}
+						text="Cast"
+						gameKey="Enter"
+						mapRef={mapRef}
+						className="h-[50px] rounded-full border-violet-500/70 text-violet-700 dark:text-violet-300"
+					/>
+				) : (
+					<TouchButton
+						label={
+							context.detail
+								? `${context.label}: ${context.detail}`
+								: context.label
+						}
+						icon={CONTEXT_ICONS[context.key]}
+						text={context.label}
+						gameKey={context.key}
+						mapRef={mapRef}
+						className={`${amber} rounded-full ${context.available ? "" : "opacity-60"}`}
+					/>
+				)}
 				<TouchButton
 					label="Move right"
 					icon={ArrowRight}
