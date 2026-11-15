@@ -55,7 +55,7 @@ To build the APK you need JDK 21 and the Android SDK (`ANDROID_HOME`, platform 3
 pnpm frontend:android:apk
 ```
 
-The APK is written to `frontend/android/app/build/outputs/apk/debug/app-debug.apk`. The **Android app** workflow also builds it on pushes to `main` and on demand, and keeps it as the `wardens-flame-apk` artifact. Every build is signed with the committed sideload key (`frontend/android/app/sideload.keystore`), so a new APK installs over the old one and keeps the saved game. That key is only for sideloading, never for a store release.
+The APK is written to `frontend/android/app/build/outputs/apk/debug/app-debug.apk`. The **Android app** workflow also builds it on pushes to `main` and on demand, and keeps it as the `wardens-flame-apk` artifact. Each `main` build also replaces the APK on the `latest` pre-release, so this link always installs the newest app, with no GitHub sign-in: <https://github.com/danielgebhardt/the-wardens-flame/releases/download/latest/wardens-flame.apk>. Every build is signed with the committed sideload key (`frontend/android/app/sideload.keystore`), so a new APK installs over the old one and keeps the saved game. That key is only for sideloading, never for a store release.
 
 ## Accounts
 
