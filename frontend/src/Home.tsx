@@ -1,8 +1,10 @@
 import { Dialog } from "@base-ui/react/dialog";
 import {
+	BookOpen,
 	HelpCircleIcon,
 	LibraryBig,
 	Save,
+	ScrollText,
 	Settings,
 	UserRound,
 } from "lucide-react";
@@ -16,7 +18,12 @@ import {
 } from "react";
 import { Button } from "@/components/ui/button";
 import FantasyRail from "@/components/ui/FantasyRail.tsx";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import {
+	Sheet,
+	SheetContent,
+	SheetTitle,
+	SheetTrigger,
+} from "@/components/ui/sheet";
 import { HEADER_BUTTON_SECONDARY } from "@/HeaderButtonStyles.ts";
 import DungeonHelp from "@/settings/DungeonHelp.tsx";
 import AccountMenu from "./accounts/AccountMenu";
@@ -29,6 +36,10 @@ import CharacterDialog from "./components/game/CharacterDialog.tsx";
 import DungeonNotices from "./components/game/DungeonNotices";
 import GameOverDialog from "./components/game/GameOverDialog";
 import { isLowHealth } from "./components/game/HealthDisplay";
+import {
+	HOTBAR_CARD_CLASS_NAME,
+	HOTBAR_SLOT_CLASS_NAME,
+} from "./components/game/HotbarSlot";
 import NewAdventureDialog from "./components/game/NewAdventureDialog";
 import OmenArrivalDialog, {
 	useOmenArrival,
@@ -39,6 +50,7 @@ import PotionHotbarView from "./components/game/PotionHotbarView";
 import QuestStatus from "./components/game/QuestStatus";
 import RemediesButton from "./components/game/RemediesButton";
 import SpellHotbarView from "./components/game/SpellHotbarView";
+import StatusEffectIcons from "./components/game/StatusEffectIcons";
 import { useAdventureSession } from "./components/game/useAdventureSession";
 import { useAutosave } from "./components/game/useAutosave";
 import { useCombatFeedback } from "./components/game/useCombatFeedback";
@@ -48,7 +60,12 @@ import { useSpellTargeting } from "./components/game/useSpellTargeting";
 import VictoryDialog from "./components/game/VictoryDialog";
 import MerchantDialog from "./components/merchant/MerchantDialog";
 import ObjectChoiceDialog from "./components/objects/ObjectChoiceDialog";
-import { TouchControls } from "./components/touch/TouchControls";
+import PhoneMenu from "./components/touch/PhoneMenu";
+import PhoneStatusStrip from "./components/touch/PhoneStatusStrip";
+import {
+	type TouchContextAction,
+	TouchControls,
+} from "./components/touch/TouchControls";
 import SanctuaryDialog from "./components/town/SanctuaryDialog";
 import TownEquipmentShop from "./components/town/TownEquipmentShop";
 import TownForgeDialog from "./components/town/TownForgeDialog";
@@ -70,6 +87,7 @@ import {
 } from "./domain/dungeon/RunConfiguration.ts";
 import { MAX_SEED, parseSeedInput } from "./domain/dungeon/Seed.ts";
 import type { VictorySummary } from "./domain/game/Adventure";
+import { afflictionImpact } from "./domain/game/AfflictionText";
 import { defeatRecap } from "./domain/game/DefeatRecap";
 import type { DeveloperFeature } from "./domain/game/DeveloperFeatures";
 import type { Difficulty } from "./domain/game/Difficulty";
@@ -85,9 +103,14 @@ import { isTestSeed, randomAdventureSeed } from "./domain/game/TestSeed";
 import { canAddToBag } from "./domain/items/Bag";
 import { emptyEquipmentSlotFor } from "./domain/items/Equipment";
 import { ITEM_DEFINITIONS } from "./domain/items/Item";
+import { itemName } from "./domain/items/ItemValues";
 import type { HotbarSlot } from "./domain/items/PotionHotbar";
 import { isWarden } from "./domain/monsters/EmberWarden";
-import { type DungeonObject, isDoor } from "./domain/objects/DungeonObject";
+import {
+	type DungeonObject,
+	isDoor,
+	objectLabel,
+} from "./domain/objects/DungeonObject";
 import { isFloorRevealed } from "./domain/objects/MirrorOfShadows";
 import { objectChoices } from "./domain/objects/ObjectChoices";
 import { nearbyInteractionObjects } from "./domain/objects/ObjectInteraction";
@@ -207,11 +230,13 @@ const Home = ({
 	const developerStatisticsOpen = useDeveloperStatisticsOpen();
 	const [characterOpen, setCharacterOpen] = useState(false);
 	// The perk reminder opens Character on Progression; every other open starts on Character.
-	const [characterTab, setCharacterTab] = useState<"character" | "progression">(
-		"character",
-	);
+	const [characterTab, setCharacterTab] = useState<
+		"character" | "progression" | "spells"
+	>("character");
 	const [characterOpenedFromMap, setCharacterOpenedFromMap] = useState(false);
-	const openCharacterFromMap = (tab: "character" | "progression") => {
+	const openCharacterFromMap = (
+		tab: "character" | "progression" | "spells",
+	) => {
 		setCharacterTab(tab);
 		setCharacterOpenedFromMap(true);
 		setCharacterOpen(true);
@@ -225,6 +250,7 @@ const Home = ({
 	const [merchantId, setMerchantId] = useState<string | null>(null);
 	const mapRef = useRef<HTMLElement>(null);
 	const [touch] = useState(() => touchControlsEnabled());
+	const [logOpen, setLogOpen] = useState(false);
 	const previousDeveloperPage = useRef(false);
 	useEffect(() => {
 		if (developerStatisticsOpen) {
@@ -439,7 +465,7 @@ const Home = ({
 		setInteractionTargets([]);
 		setMerchantId(null);
 	};
-	const handleInteractRequested = () => {
+	const interactionCandidates = () => {
 		const nearby = nearbyInteractionObjects(game.state).filter(
 			(object) =>
 				!fogConfiguration.enabled ||
@@ -451,6 +477,10 @@ const Home = ({
 				!object.activated ||
 				(isChestOnTile(object) && currentItems.length > 0),
 		);
+		return { nearby, usable };
+	};
+	const handleInteractRequested = () => {
+		const { nearby, usable } = interactionCandidates();
 		const selected = usable[0] ?? nearby[0];
 		if (usable.length > 1) setInteractionTargets(usable);
 		else if (selected) selectInteractionObject(selected);
@@ -473,6 +503,7 @@ const Home = ({
 		!developerStatisticsOpen &&
 		!characterOpen &&
 		!pickupOpen &&
+		!logOpen &&
 		!victoryOpen;
 	const gameplayEnabled = mapInputAvailable && canPlay;
 	const spells = useSpellTargeting(
@@ -535,6 +566,122 @@ const Home = ({
 		}
 	};
 
+	const townTravelLabel = atTownPortal(game.state)
+		? game.state.townPortal
+			? `Return to floor ${game.state.townPortal.floorNumber}`
+			: "Inspect dormant portal"
+		: "Enter dungeon";
+	// What the touch pad's action corner does here: the key a keyboard player would press.
+	const touchContext = ((): TouchContextAction => {
+		if (town) {
+			if (atTownGate(game.state) || atTownPortal(game.state))
+				return {
+					label: atTownPortal(game.state)
+						? game.state.townPortal
+							? "Return"
+							: "Inspect"
+						: "Descend",
+					detail: townTravelLabel,
+					key: "Enter",
+					available: true,
+				};
+			return townService
+				? {
+						label: "Browse",
+						detail: townService.label,
+						key: "e",
+						available: true,
+					}
+				: { label: "Inspect", key: "e", available: true };
+		}
+		if (currentItems.length)
+			return {
+				label: "Pick up",
+				detail:
+					currentItems.length === 1
+						? itemName(currentItems[0].item)
+						: `${currentItems.length} items`,
+				key: "g",
+				available: true,
+			};
+		const { nearby, usable } = interactionCandidates();
+		const object = usable[0] ?? nearby[0];
+		if (object)
+			return {
+				label: isDoor(object)
+					? object.activated
+						? "Close"
+						: "Open"
+					: object.kind === "merchant"
+						? "Trade"
+						: "Use",
+				detail: objectLabel(object),
+				key: "e",
+				available: usable.length > 0,
+			};
+		if (atDungeonEntrance(game.state) && !game.state.quest.cureRecovered)
+			return {
+				label: "To town",
+				detail: "Return to town",
+				key: "Enter",
+				available: true,
+			};
+		return { label: "Interact", key: "e", available: false };
+	})();
+	const quickSlots = (
+		<fieldset
+			aria-label="Quick slots"
+			className="
+            flex min-w-0 max-w-full flex-wrap
+            items-start justify-center gap-x-3 gap-y-3
+            bg-muted/20 px-8 py-2 @min-[57rem]/hotbar:px-5
+            @max-[57rem]/hotbar:gap-x-2
+            phone:grid phone:grid-cols-4 phone:gap-1.5! phone:bg-transparent phone:p-0
+         "
+		>
+			<RemediesButton
+				bag={game.state.bag}
+				afflictions={game.state.afflictions}
+				enabled={remediesEnabled}
+				open={remediesOpen}
+				onOpenChange={setRemediesOpen}
+				onUse={handleRemedyUsed}
+			/>
+			<PotionHotbarView
+				bag={game.state.bag}
+				potionHotbar={game.state.potionHotbar}
+				alive={gameplayEnabled && !spells.targeting}
+				onActivate={handlePotionRequested}
+			/>
+
+			<div
+				aria-hidden="true"
+				className="hidden self-stretch border-l border-amber-800/40 dark:border-amber-500/30 xl:block"
+			/>
+
+			<SpellHotbarView
+				slots={game.state.spellHotbar}
+				knownSpells={game.state.knownSpells}
+				enabled={gameplayEnabled && !town}
+				targeting={spells.targeting?.spell}
+				onActivate={spells.activate}
+				progression={game.state.progression}
+			/>
+			{touch && (
+				<div className={`${HOTBAR_CARD_CLASS_NAME} phone:order-2`}>
+					<button
+						type="button"
+						aria-label="Open spells"
+						disabled={!mapInputAvailable}
+						onClick={() => openCharacterFromMap("spells")}
+						className={`${HOTBAR_SLOT_CLASS_NAME} border-violet-500/40 text-violet-700 disabled:opacity-50 dark:text-violet-300`}
+					>
+						<BookOpen aria-hidden="true" className="size-6" />
+					</button>
+				</div>
+			)}
+		</fieldset>
+	);
 	return (
 		<div className="ember-surface flex min-h-dvh flex-col bg-muted/30 lg:h-dvh phone:h-dvh phone:min-h-0 phone:overflow-hidden">
 			<Header
@@ -545,6 +692,20 @@ const Home = ({
 					return kind ? OMEN_DEFINITIONS[kind] : undefined;
 				})()}
 				onNewDungeon={() => setNewDungeonOpen(true)}
+				turn={turn}
+				phoneMenu={
+					touch ? (
+						<PhoneMenu
+							onNewAdventure={() => setNewDungeonOpen(true)}
+							onSettings={() => setSettingsOpen(true)}
+							onBestiary={
+								APP_FEATURES.developerCatalog
+									? () => setCatalogOpen(true)
+									: undefined
+							}
+						/>
+					) : undefined
+				}
 				characterAction={
 					<Dialog.Root open={characterOpen} onOpenChange={setCharacterOpen}>
 						<Dialog.Trigger
@@ -557,7 +718,7 @@ const Home = ({
 									title="Character"
 									type="button"
 									variant="outline"
-									className={HEADER_BUTTON_SECONDARY}
+									className={`${HEADER_BUTTON_SECONDARY} phone:hidden`}
 								/>
 							}
 						>
@@ -663,7 +824,7 @@ const Home = ({
 									title="Settings"
 									type="button"
 									variant="outline"
-									className={HEADER_BUTTON_SECONDARY}
+									className={`${HEADER_BUTTON_SECONDARY} phone:hidden`}
 								/>
 							}
 						>
@@ -718,7 +879,7 @@ const Home = ({
 										title="Bestiary"
 										type="button"
 										variant="outline"
-										className={HEADER_BUTTON_SECONDARY}
+										className={`${HEADER_BUTTON_SECONDARY} phone:hidden`}
 									/>
 								}
 							>
@@ -789,53 +950,64 @@ const Home = ({
 					data-low-health={isLowHealth(player)}
 					className="ember-surface flex min-h-0 min-w-0 flex-1 flex-col gap-2 rounded-lg border border-border bg-card p-2 phone:gap-1 phone:p-1"
 				>
-					<FantasyRail className="mx-auto w-full max-w-[83rem] shrink-0">
-						<div
-							className="
-         grid min-w-0 grid-cols-1 items-center gap-2
-         rounded-md bg-muted/20 px-2 py-1.5 sm:px-7 phone:gap-1 phone:px-1 phone:py-0.5
-         lg:grid-cols-[minmax(0,1fr)_19rem] xl:grid-cols-[minmax(0,1fr)_20rem]
-      "
-						>
-							<div className="min-w-0">
-								<PlayerStatus
-									difficulty={game.state.difficulty}
-									effects={game.state.effects}
-									afflictions={game.state.afflictions}
-									gold={game.state.gold}
-									equipment={game.state.equipment}
-									mana={game.state.mana}
-									turn={turn}
-									player={player}
-									progression={game.state.progression}
-									perksWaiting={perksWaiting}
-									pact={game.state.progression.pact}
-									onPerkRequested={() => openCharacterFromMap("progression")}
-								/>
-							</div>
+					{touch ? (
+						<PhoneStatusStrip
+							player={player}
+							mana={game.state.mana}
+							gold={game.state.gold}
+							progression={game.state.progression}
+							equipment={game.state.equipment}
+							effects={game.state.effects}
+							afflictions={game.state.afflictions}
+							onOpen={() =>
+								openCharacterFromMap(
+									perksWaiting > 0 ? "progression" : "character",
+								)
+							}
+						/>
+					) : (
+						<FantasyRail className="mx-auto w-full max-w-[83rem] shrink-0">
+							<div
+								className="
+	         grid min-w-0 grid-cols-1 items-center gap-2
+	         rounded-md bg-muted/20 px-2 py-1.5 sm:px-7 phone:gap-1 phone:px-1 phone:py-0.5
+	         lg:grid-cols-[minmax(0,1fr)_19rem] xl:grid-cols-[minmax(0,1fr)_20rem]
+	      "
+							>
+								<div className="min-w-0">
+									<PlayerStatus
+										difficulty={game.state.difficulty}
+										effects={game.state.effects}
+										afflictions={game.state.afflictions}
+										gold={game.state.gold}
+										equipment={game.state.equipment}
+										mana={game.state.mana}
+										turn={turn}
+										player={player}
+										progression={game.state.progression}
+										perksWaiting={perksWaiting}
+										pact={game.state.progression.pact}
+										onPerkRequested={() => openCharacterFromMap("progression")}
+									/>
+								</div>
 
-							<div className="min-w-0">
-								<QuestStatus
-									quest={game.state.quest}
-									activeFloor={game.state.run.activeFloor}
-									wardenStanding={wardenStanding}
-								/>
+								<div className="min-w-0">
+									<QuestStatus
+										quest={game.state.quest}
+										activeFloor={game.state.run.activeFloor}
+										wardenStanding={wardenStanding}
+									/>
+								</div>
 							</div>
-						</div>
-					</FantasyRail>
+						</FantasyRail>
+					)}
 					<div className="grid min-h-0 flex-1 grid-cols-1 gap-2 phone:flex phone:flex-col phone:gap-1 lg:grid-cols-[minmax(0,1fr)_18rem] lg:grid-rows-[auto_minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:grid-cols-[minmax(0,1fr)_22rem] min-[112.5rem]:grid-cols-[minmax(0,1fr)_26rem]">
 						<div className="order-1 flex h-[50dvh] min-h-[23rem] min-w-0 flex-col phone:h-auto phone:min-h-40 phone:flex-1 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:h-auto lg:min-h-0">
 							<DungeonFrame>
 								{town ? (
 									<TownMap
 										portalFloor={game.state.townPortal?.floorNumber}
-										travelLabel={
-											atTownPortal(game.state)
-												? game.state.townPortal
-													? `Return to floor ${game.state.townPortal.floorNumber}`
-													: "Inspect dormant portal"
-												: "Enter dungeon"
-										}
+										travelLabel={townTravelLabel}
 										location={town}
 										mapRef={mapRef}
 										enabled={gameplayEnabled}
@@ -968,8 +1140,17 @@ const Home = ({
 								)}
 							</DungeonFrame>
 						</div>
-						<div className="order-2 flex min-w-0 flex-col lg:col-start-2 lg:row-start-1">
+						<div className="order-2 flex min-w-0 flex-col phone:-order-1 phone:flex-row phone:items-start phone:gap-1 lg:col-start-2 lg:row-start-1">
 							<DungeonNotices
+								fallback={
+									touch ? (
+										<QuestStatus
+											quest={game.state.quest}
+											activeFloor={game.state.run.activeFloor}
+											wardenStanding={wardenStanding}
+										/>
+									) : undefined
+								}
 								state={game.state}
 								visible={
 									fogConfiguration.enabled ? exploration.visible : undefined
@@ -998,60 +1179,79 @@ const Home = ({
 										: undefined
 								}
 							/>
-						</div>
-						<div className="order-4 flex min-h-0 min-w-0 flex-col phone:h-24 phone:shrink-0 lg:col-start-2 lg:row-span-2 lg:row-start-2 [&>*]:flex-1 [&>*]:min-h-0">
-							<ActivityLog
-								history={game.state.activityHistory}
-								resetKey={run.floors}
-							/>
-						</div>
-
-						<div className="@container/hotbar order-3 flex min-w-0 justify-center lg:col-start-1 lg:row-start-3">
-							<FantasyRail className="w-fit max-w-full">
-								<fieldset
-									aria-label="Quick slots"
-									className="
-            flex min-w-0 max-w-full flex-wrap
-            items-start justify-center gap-x-3 gap-y-3
-            bg-muted/20 px-8 py-2 @min-[57rem]/hotbar:px-5
-            @max-[57rem]/hotbar:gap-x-2
-            phone:flex-nowrap phone:gap-x-0.5! phone:overflow-x-auto phone:px-1 phone:py-1
-         "
-								>
-									<RemediesButton
-										bag={game.state.bag}
+							{touch && (
+								<div className="flex shrink-0 items-center gap-1 py-1">
+									<StatusEffectIcons
+										effects={game.state.effects}
 										afflictions={game.state.afflictions}
-										enabled={remediesEnabled}
-										open={remediesOpen}
-										onOpenChange={setRemediesOpen}
-										onUse={handleRemedyUsed}
+										impact={afflictionImpact(
+											game.state.progression,
+											game.state.effects,
+											game.state.equipment,
+											game.state.afflictions,
+										)}
 									/>
-									<PotionHotbarView
-										bag={game.state.bag}
-										potionHotbar={game.state.potionHotbar}
-										alive={gameplayEnabled && !spells.targeting}
-										onActivate={handlePotionRequested}
-									/>
-
-									<div
-										aria-hidden="true"
-										className="hidden self-stretch border-l border-amber-800/40 dark:border-amber-500/30 xl:block"
-									/>
-
-									<SpellHotbarView
-										slots={game.state.spellHotbar}
-										knownSpells={game.state.knownSpells}
-										enabled={gameplayEnabled && !town}
-										targeting={spells.targeting?.spell}
-										onActivate={spells.activate}
-										progression={game.state.progression}
-									/>
-								</fieldset>
-							</FantasyRail>
+									<Sheet
+										open={logOpen}
+										onOpenChange={setLogOpen}
+										onOpenChangeComplete={(open) => {
+											if (!open && mapInputAvailable)
+												mapRef.current?.focus({ preventScroll: true });
+										}}
+									>
+										<SheetTrigger
+											render={
+												<Button
+													title="Activity log"
+													type="button"
+													variant="outline"
+													className="h-8 gap-1 px-2 text-xs"
+												/>
+											}
+										>
+											<ScrollText aria-hidden="true" />
+											Log
+										</SheetTrigger>
+										<SheetContent
+											side="bottom"
+											className="h-[70dvh] p-2 pt-10"
+											finalFocus={mapInputAvailable ? mapRef : false}
+										>
+											<SheetTitle className="sr-only">Activity log</SheetTitle>
+											<ActivityLog
+												history={game.state.activityHistory}
+												resetKey={run.floors}
+											/>
+										</SheetContent>
+									</Sheet>
+								</div>
+							)}
 						</div>
+						{!touch && (
+							<div className="order-4 flex min-h-0 min-w-0 flex-col lg:col-start-2 lg:row-span-2 lg:row-start-2 [&>*]:flex-1 [&>*]:min-h-0">
+								<ActivityLog
+									history={game.state.activityHistory}
+									resetKey={run.floors}
+								/>
+							</div>
+						)}
+
+						{!touch && (
+							<div className="@container/hotbar order-3 flex min-w-0 justify-center lg:col-start-1 lg:row-start-3">
+								<FantasyRail className="w-fit max-w-full">
+									{quickSlots}
+								</FantasyRail>
+							</div>
+						)}
 					</div>
 					{touch ? (
-						<TouchControls mapRef={mapRef} aiming={Boolean(spells.targeting)} />
+						<TouchControls
+							mapRef={mapRef}
+							aiming={Boolean(spells.targeting)}
+							context={touchContext}
+							perkWaiting={perksWaiting > 0}
+							hotbar={quickSlots}
+						/>
 					) : null}
 				</section>
 			</main>

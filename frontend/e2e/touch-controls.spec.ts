@@ -24,7 +24,7 @@ test("touch controls play from town into the dungeon on one phone screen", async
 	// Two steps south reach the dungeon gate; Enter descends, as from the keyboard.
 	await tap(page, "Move down");
 	await tap(page, "Move down");
-	await tap(page, "Enter or leave");
+	await tap(page, "Descend: Enter dungeon");
 	await expect(map(page)).toBeVisible();
 	await expect(turns(page)).toHaveText("Turn 0");
 

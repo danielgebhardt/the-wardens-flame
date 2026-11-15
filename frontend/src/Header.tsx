@@ -21,6 +21,9 @@ type HeaderProps = {
 	// Developer tools, beside the avatar, for developer accounts only.
 	devAction?: ReactNode;
 	rankingsAction?: ReactNode;
+	// The phone layout shows the turn here and folds New, Settings and Bestiary into a menu.
+	turn?: number;
+	phoneMenu?: ReactNode;
 };
 
 const Header = ({
@@ -36,6 +39,8 @@ const Header = ({
 	accountAction,
 	devAction,
 	rankingsAction,
+	turn,
+	phoneMenu,
 }: HeaderProps) => (
 	<header
 		className="
@@ -51,7 +56,7 @@ const Header = ({
 		<div className="flex min-w-0 flex-1 items-center gap-3 phone:gap-1.5">
 			<EmberEmblem className="size-12 phone:size-8" />
 
-			<div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1">
+			<div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 phone:flex-nowrap phone:gap-x-2">
 				<h1
 					className="
                   font-serif text-xl font-semibold tracking-wide
@@ -76,19 +81,27 @@ const Header = ({
 					className="
                   whitespace-nowrap font-serif text-sm
                   text-muted-foreground sm:text-base
-                  phone:text-sm phone:leading-tight phone:whitespace-normal
+                  phone:truncate phone:text-[15px] phone:font-semibold phone:text-foreground
                "
 				>
 					{floorNumber === 0
 						? "Beacon town · Level 0"
 						: `Floor ${floorNumber} of ${floorCount}`}
 				</h2>
+				{phoneMenu && turn !== undefined && (
+					<output
+						aria-label="Turn count"
+						className="shrink-0 whitespace-nowrap rounded border border-border bg-muted/60 px-1 py-0.5 text-[11px] leading-3 text-muted-foreground"
+					>
+						Turn {turn}
+					</output>
+				)}
 				{omen && floorNumber > 0 && (
 					<span
 						role="note"
 						aria-label={`Omen: ${omen.name}. ${omen.description}`}
 						title={omen.description}
-						className="whitespace-nowrap rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary"
+						className="whitespace-nowrap rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary phone:min-w-0 phone:truncate"
 					>
 						{omen.name}
 					</span>
@@ -111,7 +124,7 @@ const Header = ({
 				// Short on screen to leave room for the account avatar.
 				aria-label="New Dungeon"
 				title="New Dungeon"
-				className={HEADER_BUTTON_PRIMARY}
+				className={`${HEADER_BUTTON_PRIMARY} phone:hidden`}
 			>
 				<RefreshCw aria-hidden="true" focusable="false" />
 				<span className="sr-only xl:not-sr-only">New</span>
@@ -123,6 +136,7 @@ const Header = ({
 			{helpAction}
 			{rankingsAction}
 			{catalogAction}
+			{phoneMenu}
 			{accountAction && (
 				<>
 					<span

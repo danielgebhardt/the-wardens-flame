@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { GameState } from "../../domain/game/GameState";
 import { ongoingSpellPotency } from "../../domain/game/OngoingSpellPotency";
 import type { Hint } from "../../domain/hints/Hints";
@@ -20,6 +21,8 @@ type Props = {
 	onVictorySummary: () => void;
 	onReviewSarcophagus?: (object: DungeonObject) => void;
 	hint?: { current: Hint; onDismiss: () => void; onMore: () => void } | null;
+	// Shown instead of "Nothing of note nearby." when there is nothing to say (the phone layout's objective).
+	fallback?: ReactNode;
 };
 const DungeonNotices = ({
 	state,
@@ -32,6 +35,7 @@ const DungeonNotices = ({
 	onVictorySummary,
 	onReviewSarcophagus,
 	hint,
+	fallback,
 }: Props) => {
 	const town = state.town;
 	const victory = state.quest.victory;
@@ -44,7 +48,7 @@ const DungeonNotices = ({
 				aria-label="Dungeon notices"
 				// biome-ignore lint/a11y/noNoninteractiveTabindex: Keyboard users need to scroll longer notices.
 				tabIndex={0}
-				className="min-h-0 overflow-y-auto px-3 py-1 empty:py-2.5 empty:text-xs empty:text-muted-foreground empty:before:content-['Nothing_of_note_nearby.'] focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-ring"
+				className={`min-h-0 overflow-y-auto px-3 py-1 ${fallback ? "peer empty:hidden" : ""} empty:py-2.5 empty:text-xs empty:text-muted-foreground empty:before:content-['Nothing_of_note_nearby.'] focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-ring`}
 			>
 				{hint && (
 					<HintNotice
@@ -114,6 +118,7 @@ const DungeonNotices = ({
 						</p>
 					)}
 			</section>
+			{fallback && <div className="hidden peer-empty:block">{fallback}</div>}
 		</div>
 	);
 };

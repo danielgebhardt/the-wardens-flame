@@ -41,7 +41,7 @@ const RemediesButton = ({
 
 	return (
 		<Popover.Root open={open && enabled} onOpenChange={onOpenChange}>
-			<div className={HOTBAR_CARD_CLASS_NAME}>
+			<div className={`${HOTBAR_CARD_CLASS_NAME} phone:order-1`}>
 				<Popover.Trigger
 					disabled={!enabled}
 					aria-label={needed ? "Remedies, cure available" : "Remedies"}
