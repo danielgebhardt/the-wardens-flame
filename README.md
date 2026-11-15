@@ -188,7 +188,7 @@ pnpm frontend:build
 pnpm frontend:smoke
 ```
 
-Install Chromium once with `pnpm --dir frontend exec playwright install --only-shell chromium`. Browser scenarios use the production build and fresh contexts; Playwright generates current-format fixtures before running.
+Install Chromium once with `pnpm --dir frontend exec playwright install --only-shell chromium`. Browser scenarios use the production build and fresh contexts; Playwright generates current-format fixtures before running. The developer-analytics flows need a build with accounts configured: CI builds them with the placeholder `demo-wardens-flame` settings, and locally your `.env.local` provides them.
 
 For a focused change, run the relevant test files first. The normal commit hook formats/checks, runs the complete frontend suite and builds production; avoid duplicating that full pass immediately before committing. CI also checks strict types and Chromium.
 

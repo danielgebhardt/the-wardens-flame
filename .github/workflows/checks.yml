@@ -49,6 +49,14 @@ jobs:
     needs: frontend
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    # Build with accounts switched on, as a developer's .env.local does, so the account
+    # code exists for the developer-analytics flows to replace with a fixture developer.
+    # `demo-` projects never reach a live Firebase project, and no flow signs in for real.
+    env:
+      VITE_FIREBASE_API_KEY: demo-api-key
+      VITE_FIREBASE_AUTH_DOMAIN: demo-wardens-flame.firebaseapp.com
+      VITE_FIREBASE_PROJECT_ID: demo-wardens-flame
+      VITE_FIREBASE_APP_ID: demo-app-id
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
