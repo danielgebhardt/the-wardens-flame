@@ -1,7 +1,8 @@
 name: Android app
 
-# Builds the sideloadable offline Android app (see frontend/README.md#android-app) and
-# keeps the APK as a downloadable artifact.
+# Builds the sideloadable offline Android app (see README.md, "Android app"), keeps the
+# APK as an artifact and, for main, publishes it at a fixed link anyone can install from:
+# https://github.com/danielgebhardt/the-wardens-flame/releases/download/latest/wardens-flame.apk
 on:
   push:
     branches: [main]
@@ -47,3 +48,44 @@ jobs:
           path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
+
+  publish:
+    name: Publish the APK at the fixed download link
+    needs: apk
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    # Only this job may write: it moves the `latest` tag and replaces the release's APK.
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Point the latest pre-release at this build
+        run: |
+          set -euo pipefail
+          gh run download "$GITHUB_RUN_ID" --name wardens-flame-apk --dir apk
+          mv apk/app-debug.apk wardens-flame.apk
+          # The tag follows main; a pre-release keeps the game's own versions as "Latest".
+          if gh api "repos/$GH_REPO/git/refs/tags/latest" > /dev/null 2>&1; then
+            gh api -X PATCH "repos/$GH_REPO/git/refs/tags/latest" \
+              -f sha="$GITHUB_SHA" -F force=true > /dev/null
+          else
+            gh api -X POST "repos/$GH_REPO/git/refs" \
+              -f ref=refs/tags/latest -f sha="$GITHUB_SHA" > /dev/null
+          fi
+          notes="The offline Android app, built from main at ${GITHUB_SHA::7}.
+
+          To install, open this link on an Android phone, then open the downloaded file and allow installs from your browser when asked:
+          https://github.com/$GH_REPO/releases/download/latest/wardens-flame.apk
+
+          A newer build installs over an older one and keeps the saved game."
+          if gh release view latest > /dev/null 2>&1; then
+            gh release edit latest --notes "$notes"
+          else
+            gh release create latest --title "Android app (latest build)" \
+              --notes "$notes" --prerelease --latest=false
+          fi
+          gh release upload latest wardens-flame.apk --clobber
