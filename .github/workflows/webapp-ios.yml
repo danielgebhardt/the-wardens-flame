@@ -99,6 +99,15 @@ jobs:
           cp -R build/Build/Products/Release-iphoneos/App.app Payload/
           zip -qry "$GITHUB_WORKSPACE/wardens-flame.ipa" Payload
           ls -l "$GITHUB_WORKSPACE/wardens-flame.ipa"
+      - name: Check the .ipa holds Capacitor and the game
+        run: |
+          unzip -l wardens-flame.ipa > ipa-contents.txt
+          grep -E 'Capacitor\.framework/Capacitor$|public/index\.html$|public/assets/index-[^/]*\.js$' ipa-contents.txt
+          for pattern in 'Payload/App\.app/Frameworks/Capacitor\.framework/' \
+            'Payload/App\.app/public/index\.html$' \
+            'Payload/App\.app/public/assets/index-[^/]*\.js$'; do
+            grep -qE "$pattern" ipa-contents.txt || { echo "The .ipa is missing $pattern"; exit 1; }
+          done
       - name: Keep the .ipa
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

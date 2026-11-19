@@ -36,7 +36,7 @@ A deterministic fantasy dungeon crawler (React + TypeScript), inspired by Larn. 
 - `webapp-ios.yml` (**Web app and iOS**; every push, manual):
   - `build`: webapp build plus `webapp-check.mjs`; on main, uploads the Pages artifact.
   - `pages` (main only): `configure-pages` + `deploy-pages`. Pages' source must be "GitHub Actions" in the repo settings.
-  - `ios` (`macos-26`, needs build): unsigned Release `xcodebuild`, zips `Payload/App.app` into `wardens-flame.ipa`, keeps it as an artifact, and on main runs `gh release upload latest … --clobber`.
+  - `ios` (`macos-26`, needs build): unsigned Release `xcodebuild`, zips `Payload/App.app` into `wardens-flame.ipa`, and checks with `unzip -l` that it holds `Frameworks/Capacitor.framework`, `public/index.html` and the JS bundle. It keeps the `.ipa` as an artifact, and on main runs `gh release upload latest … --clobber`.
 
 ## Workflow
 - Commit work to the branch and push the branch first. For iOS changes, watch its `ios` job pass.
