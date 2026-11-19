@@ -23,7 +23,7 @@ import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
 import type { DeveloperFeature } from "../../domain/game/DeveloperFeatures";
 import { type SaveDocument, saveSummary } from "../../domain/saves/SaveFormat";
 import { useSaves } from "../../saves/SavesProvider";
-import { IS_ANDROID_APP } from "../../settings/Platform";
+import { IS_OFFLINE_BUILD } from "../../settings/Platform";
 import RankingsButton from "../../statistics/RankingsButton";
 import AdventurerChoice from "./AdventurerChoice";
 import AdventureSaveSheet from "./AdventureSaveSheet";
@@ -103,7 +103,7 @@ const AdventureOpening = ({
 	const title = useRef<HTMLHeadingElement>(null);
 
 	return (
-		<div className="flex min-h-dvh items-center justify-center bg-muted/30 p-3 sm:p-6">
+		<div className="flex min-h-dvh items-center justify-center bg-muted/30 p-3 sm:p-6 phone:pt-[max(0.75rem,env(safe-area-inset-top))] phone:pb-[max(0.75rem,env(safe-area-inset-bottom))]">
 			<Dialog.Root open={!suspended} disablePointerDismissal>
 				<Dialog.Portal>
 					<Dialog.Backdrop className="fixed inset-0 z-50 bg-black/55 backdrop-blur-sm" />
@@ -319,11 +319,11 @@ const AdventureOpening = ({
 									)}
 
 									<div
-										className={`grid gap-2.5 [&>button]:h-10 ${IS_ANDROID_APP ? "grid-cols-1" : "grid-cols-2"}`}
+										className={`grid gap-2.5 [&>button]:h-10 ${IS_OFFLINE_BUILD ? "grid-cols-1" : "grid-cols-2"}`}
 									>
 										<RunHistoryDialog triggerClassName="w-full text-muted-foreground hover:text-foreground" />
-										{/* The offline Android app has no online rankings. */}
-										{IS_ANDROID_APP ? null : <RankingsButton />}
+										{/* The offline apps and web app have no online rankings. */}
+										{IS_OFFLINE_BUILD ? null : <RankingsButton />}
 									</div>
 
 									<div className="flex items-center justify-center gap-2">

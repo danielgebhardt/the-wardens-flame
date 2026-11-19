@@ -157,7 +157,7 @@ export const TouchControls = ({
 	return (
 		<section
 			aria-label="Touch controls"
-			className="flex shrink-0 items-center gap-3 px-1 pt-1 pb-1.5"
+			className="mx-auto flex w-full max-w-[34rem] shrink-0 items-center gap-3 px-1 pt-1 pb-1.5"
 		>
 			<div className="grid w-[11.5rem] shrink-0 grid-cols-3 gap-1.5">
 				<TouchButton

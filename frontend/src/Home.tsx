@@ -127,7 +127,7 @@ import Header from "./Header.tsx";
 import { addRunToHistory } from "./persistence/RunHistory";
 import DungeonSettings from "./settings/DungeonSettings.tsx";
 import { APP_FEATURES } from "./settings/FeatureFlags";
-import { IS_ANDROID_APP, touchControlsEnabled } from "./settings/Platform";
+import { IS_OFFLINE_BUILD, touchControlsEnabled } from "./settings/Platform";
 import {
 	type ConfigurationErrors,
 	type ConfigurationField,
@@ -683,7 +683,7 @@ const Home = ({
 		</fieldset>
 	);
 	return (
-		<div className="ember-surface flex min-h-dvh flex-col bg-muted/30 lg:h-dvh phone:h-dvh phone:min-h-0 phone:overflow-hidden">
+		<div className="ember-surface flex min-h-dvh flex-col bg-muted/30 lg:h-dvh phone:h-dvh phone:min-h-0 phone:overflow-hidden phone:pt-[env(safe-area-inset-top)] phone:pr-[env(safe-area-inset-right)] phone:pb-[env(safe-area-inset-bottom)] phone:pl-[env(safe-area-inset-left)]">
 			<Header
 				floorNumber={town ? 0 : activeFloor.floorNumber}
 				floorCount={run.floors.length}
@@ -894,9 +894,9 @@ const Home = ({
 						</Sheet>
 					)
 				}
-				// The offline Android app has no online rankings; Run history lists its runs.
+				// The offline apps and web app have no online rankings; Run history lists their runs.
 				rankingsAction={
-					IS_ANDROID_APP ? undefined : (
+					IS_OFFLINE_BUILD ? undefined : (
 						<RankingsButton
 							header
 							open={rankingsOpen}

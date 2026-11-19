@@ -1,5 +1,7 @@
 # Repository working instructions
 
+See also `CLAUDE.md`: links, CI jobs, build modes and the branch/main workflow.
+
 Follow `docs/ai-working-agreement.md` and `docs/definition-of-done.md`. Implementation requires the developer's explicit request; discussion alone does not start a story. The developer owns final acceptance.
 
 ## Efficient implementation workflow
@@ -26,4 +28,4 @@ Seed 7357 (`frontend/src/domain/game/TestSeed.ts`) is the developer test adventu
 
 ## Supported screens
 
-Target laptops and larger monitors, with an iPad as the smallest: it must look right on a 13" MacBook (about 1470×830 browser area) and on large displays. Phones are not a target, so don't add phone-specific layouts or 390px browser variants. The one exception is the sideloadable Android app (`frontend/android`, README "Android app"): its portrait phone layout and touch controls apply only under `IS_ANDROID_APP` / `?touch` through the `phone:` variant, and must leave the web layout unchanged. Touch buttons send the existing keyboard keys and add no game rules.
+Target laptops and larger monitors, with an iPad as the smallest: it must look right on a 13" MacBook (about 1470×830 browser area) and on large displays. Phones are not a target, so don't add phone-specific layouts or 390px browser variants. The one exception is the offline builds (the Android and iOS apps and the GitHub Pages web app; README "Install the game"): its portrait phone layout and touch controls apply only through the `phone:` variant, which `touchControlsEnabled()` turns on in the native apps, in the GitHub Pages web app on touch screens, and with `?touch`, and must leave the web layout unchanged. Touch buttons send the existing keyboard keys and add no game rules.

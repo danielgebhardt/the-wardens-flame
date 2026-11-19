@@ -12,7 +12,9 @@
     "frontend:test": "pnpm --filter frontend run test:run",
     "frontend:smoke": "pnpm --filter frontend run test:smoke",
     "frontend:android:build": "pnpm --filter frontend run android:build",
-    "frontend:android:apk": "pnpm --filter frontend run android:apk"
+    "frontend:android:apk": "pnpm --filter frontend run android:apk",
+    "frontend:webapp:build": "pnpm --filter frontend run webapp:build",
+    "frontend:ios": "pnpm --filter frontend run ios"
   },
   "devDependencies": {
     "husky": "^9.1.7"

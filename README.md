@@ -43,9 +43,26 @@ Browser Save/Load, the separate autosave and cloud saves persist the actual dung
 
 [Save architecture and compatibility policy](docs/save-policy.md) describes the migration chain, frozen per-version fixtures and when a change needs a version bump.
 
-## Android app
+## Install the game
 
-`frontend/android` wraps the same game in a [Capacitor](https://capacitorjs.com) shell as a sideloadable, offline Android app, locked to portrait. `vite build --mode android` sets `IS_ANDROID_APP` (`frontend/src/settings/Platform.ts`). That build has no accounts, cloud saves, online rankings or analytics, keeps its saves in the WebView's local storage on the phone, and adds a phone layout (the `phone:` Tailwind variant) and touch controls.
+Three builds play offline on one device, with no accounts, cloud saves, online rankings or analytics. Each keeps its saved games in that device's local storage. A browser tab, the home-screen web app and each native app keep **separate** progress.
+
+### Web app (recommended for iPhone and iPad)
+
+<https://danielgebhardt.github.io/the-wardens-flame/>
+
+- **iPhone/iPad:** open the link in Safari, tap **Share → Add to Home Screen**, then always play from the new icon. A Safari tab keeps separate progress from the icon.
+- **Android:** open it in Chrome and choose **Install app**.
+- After the first visit it works offline. A new version loads on the next launch while online.
+- On touch screens it uses the phone layout and touch controls described under the Android app. A desktop browser keeps the keyboard layout.
+
+`pnpm frontend:webapp:build` makes it (`vite build --mode webapp`, relative paths). `frontend/scripts/webapp.ts` adds the manifest, icons (`frontend/app-icons/`) and service worker, and `node frontend/scripts/webapp-check.mjs` checks that the build is installable and boots offline. The **Web app and iOS** workflow deploys it to GitHub Pages on every push to `main`.
+
+### Android app
+
+<https://github.com/danielgebhardt/the-wardens-flame/releases/download/latest/wardens-flame.apk>
+
+`frontend/android` wraps the same game in a [Capacitor](https://capacitorjs.com) shell as a sideloadable, offline Android app, locked to portrait. `vite build --mode android` is one of the offline builds (`frontend/src/settings/Platform.ts`). It has no accounts, cloud saves, online rankings or analytics, keeps its saves in the WebView's local storage on the phone, and adds a phone layout (the `phone:` Tailwind variant) and touch controls.
 
 The phone layout keeps the map large: one status strip (tap it for Character), one message line with a Log button, and a bottom bar. The bar's 3×3 pad moves you, does the tile's action in the centre (Pick up, Open, Descend…, or Cast while aiming), and holds Run, Wait, Cancel and Character in its corners; beside it a 4×3 hotbar holds the potions, spells, Remedies and a Spells shortcut. New adventure, Settings and Bestiary sit in the header menu. Each button sends the key a keyboard player would press, so touch and keyboard play follow the same rules. Android's back gesture closes the top dialog or stops aiming. To try the phone layout in a desktop browser, add `?touch` to the URL.
 
@@ -55,7 +72,23 @@ To build the APK you need JDK 21 and the Android SDK (`ANDROID_HOME`, platform 3
 pnpm frontend:android:apk
 ```
 
-The APK is written to `frontend/android/app/build/outputs/apk/debug/app-debug.apk`. The **Android app** workflow also builds it on pushes to `main` and on demand, and keeps it as the `wardens-flame-apk` artifact. Each `main` build also replaces the APK on the `latest` pre-release, so this link always installs the newest app, with no GitHub sign-in: <https://github.com/danielgebhardt/the-wardens-flame/releases/download/latest/wardens-flame.apk>. Every build is signed with the committed sideload key (`frontend/android/app/sideload.keystore`), so a new APK installs over the old one and keeps the saved game. That key is only for sideloading, never for a store release.
+The APK is written to `frontend/android/app/build/outputs/apk/debug/app-debug.apk`. The **Android app** workflow also builds it on pushes to `main` and on demand, and keeps it as the `wardens-flame-apk` artifact. Each `main` build also replaces the APK on the `latest` pre-release, so the link above always installs the newest app, with no GitHub sign-in. Every build is signed with the committed sideload key (`frontend/android/app/sideload.keystore`), so a new APK installs over the old one and keeps the saved game. That key is only for sideloading, never for a store release.
+
+### iOS app (sideloading)
+
+<https://github.com/danielgebhardt/the-wardens-flame/releases/download/latest/wardens-flame.ipa>
+
+An unsigned `.ipa` for installing with a free Apple ID; there is no App Store build. Most people should use the web app instead: it never expires. To sideload, use either:
+
+- **Xcode on a Mac:**
+  1. `pnpm frontend:ios`, then `pnpm --filter frontend ios:open`.
+  2. In the App target's **Signing & Capabilities**, choose your **Personal Team**.
+  3. On the iPhone, turn on **Settings → Privacy & Security → Developer Mode**, then run the app onto it.
+- **[AltStore](https://altstore.io):** install AltStore with its desktop companion, then open the `.ipa` in AltStore on the device.
+
+Apps signed with a free Apple ID stop opening after **7 days** until you reinstall or refresh them (AltStore refreshes automatically). A free ID allows at most **3** sideloaded apps at once.
+
+`frontend/ios` is the Capacitor project (Swift Package Manager). `pnpm frontend:ios` runs `vite build --mode ios` and `cap sync ios`. The app icon and launch logo are committed PNGs made by `frontend/scripts/app-icons.py` from the same emblem as the Android icon. The **Web app and iOS** workflow builds the `.ipa` on `macos-26` on every push, keeps it as the `wardens-flame-ipa` artifact, and on `main` attaches it to the `latest` pre-release. The iOS build is only compile-checked in CI.
 
 ## Accounts
 

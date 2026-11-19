@@ -1,3 +1,5 @@
+import { OFFLINE_MODES } from "../settings/Platform";
+
 // The Firebase web app this build signs in with, from Vite environment settings. Without
 // them the build simply has no accounts, and everything else plays as before.
 export type FirebaseWebConfig = Readonly<{
@@ -11,8 +13,9 @@ type Environment = Readonly<Record<string, string | boolean | undefined>>;
 export const firebaseWebConfig = (
 	env: Environment = import.meta.env,
 ): FirebaseWebConfig | undefined => {
-	// The offline Android app never has accounts, even if a local .env supplies keys.
-	if (env.MODE === "android") return undefined;
+	// The offline apps and web app never have accounts, even if a local .env supplies keys.
+	if (typeof env.MODE === "string" && OFFLINE_MODES.includes(env.MODE))
+		return undefined;
 	const value = (key: string) =>
 		typeof env[key] === "string" && env[key] ? (env[key] as string) : undefined;
 	const apiKey = value("VITE_FIREBASE_API_KEY");

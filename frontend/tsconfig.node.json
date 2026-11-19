@@ -27,6 +27,7 @@
 		"e2e/**/*.ts",
 		"api/**/*.ts",
 		"server/**/*.ts",
-		"capacitor.config.ts"
+		"capacitor.config.ts",
+		"scripts/webapp.ts"
 	]
 }

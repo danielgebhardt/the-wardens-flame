@@ -4,9 +4,11 @@ import App from "./App";
 // Sizes the map from the saved preference before the first render.
 import "./settings/TileSizes";
 import { touchControlsEnabled } from "./settings/Platform";
+import { initWebApp } from "./settings/WebApp";
 
 // Phone-only layout classes (`phone:`) apply under this attribute.
 if (touchControlsEnabled()) document.documentElement.dataset.phone = "";
+initWebApp();
 
 const rootElement = document.getElementById("root");
 

@@ -46,10 +46,11 @@ afterEach(() => {
 });
 
 describe("Touch controls", () => {
-	it("only appear in the Android app or with ?touch", () => {
-		expect(touchControlsEnabled(false, "")).toBe(false);
-		expect(touchControlsEnabled(false, "?touch")).toBe(true);
-		expect(touchControlsEnabled(true, "")).toBe(true);
+	it("appear in the native apps, the web app on touch screens, or with ?touch", () => {
+		expect(touchControlsEnabled(false, "", false)).toBe(false);
+		expect(touchControlsEnabled(false, "?touch", false)).toBe(true);
+		expect(touchControlsEnabled(true, "", false)).toBe(true);
+		expect(touchControlsEnabled(false, "", true)).toBe(true);
 	});
 
 	it("move and wait like the arrow keys and Space, keeping focus on the map", () => {
@@ -140,7 +141,7 @@ describe("Touch controls", () => {
 	});
 });
 
-describe("Android app build", () => {
+describe("Offline builds", () => {
 	it("never has accounts, even when Firebase keys are configured", () => {
 		const keys = {
 			VITE_FIREBASE_API_KEY: "key",
@@ -149,6 +150,7 @@ describe("Android app build", () => {
 			VITE_FIREBASE_APP_ID: "app",
 		};
 		expect(firebaseWebConfig({ ...keys, MODE: "production" })).toBeDefined();
-		expect(firebaseWebConfig({ ...keys, MODE: "android" })).toBeUndefined();
+		for (const MODE of ["android", "ios", "webapp"])
+			expect(firebaseWebConfig({ ...keys, MODE })).toBeUndefined();
 	});
 });
